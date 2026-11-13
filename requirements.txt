@@ -4,3 +4,6 @@ pyarrow
 judobase
 pytest
 ruff
+jupyter
+matplotlib
+seaborn
