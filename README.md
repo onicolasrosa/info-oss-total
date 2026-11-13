@@ -1,6 +1,6 @@
 # Info Oss Total 🥋📊
 
-Dados abertos e visualizações sobre campeonatos de **judô** e **jiu-jitsu**. O objetivo é transformar resultados dispersos em estatísticas acessíveis para atletas, treinadores e fãs.
+Dados abertos e visualizações sobre campeonatos de **judô** e **jiu-jitsu**, com foco no cenário universitário e competitivo. O objetivo é transformar resultados dispersos em estatísticas acessíveis para atletas, treinadores e fãs.
 
 ## 🎯 O problema
 
@@ -9,3 +9,13 @@ Informações sobre campeonatos de grappling estão fragmentadas: a IJF publica 
 ## 💡 A proposta
 
 O **Info Oss Total** centraliza esses dados em um pipeline reproduzível e os expõe por meio de uma API e um dashboard interativo. A primeira versão cobre **judô** (fonte mais estável e aberta) e, nas fases seguintes, expande para **jiu-jitsu** e para uma **agenda de campeonatos com inscrições abertas**.
+
+## 🏗️ Arquitetura planejada
+
+```mermaid
+flowchart LR
+    A[Fontes: IJF Judobase / Kaggle / IBJJF] --> B[Ingestão]
+    B --> C[Transformação Python + Pandas]
+    C --> D[(DuckDB / SQLite)]
+    D --> E[API FastAPI]
+    E --> F[Dashboard React / Plotly]
