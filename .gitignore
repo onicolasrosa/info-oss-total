@@ -218,3 +218,17 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+
+# --- Info Oss Total ---
+# Ambientes virtuais
+.venv/
+.env
+
+# Dados brutos e processados (ignorados para não subir arquivos gigantes)
+data/raw/*
+data/processed/*
+
+# Exceções para manter as pastas vazias no GitHub (O Git não salva pastas vazias)
+!data/raw/.gitkeep
+!data/processed/.gitkeep

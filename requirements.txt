@@ -1,0 +1,6 @@
+pandas
+duckdb
+pyarrow
+judobase
+pytest
+ruff
