@@ -9,3 +9,5 @@ matplotlib
 seaborn
 pytest-asyncio 
 pytest-mock
+fastapi
+uvicorn
