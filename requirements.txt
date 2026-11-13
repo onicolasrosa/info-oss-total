@@ -7,3 +7,5 @@ ruff
 jupyter
 matplotlib
 seaborn
+pytest-asyncio 
+pytest-mock
