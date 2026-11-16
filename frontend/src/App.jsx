@@ -3,14 +3,19 @@ import './App.css'
 
 function App() {
   const [competicoes, setCompeticoes] = useState([])
+  const [lutas, setLutas] = useState([])
   const [loading, setLoading] = useState(true)
-  const [activeTab, setActiveTab] = useState('competicoes') // Estado da aba atual
+  const [activeTab, setActiveTab] = useState('competicoes')
 
   useEffect(() => {
     fetch('http://127.0.0.1:8000/competicoes?limit=10')
       .then(response => response.json())
+      .then(data => setCompeticoes(data.dados))
+
+    fetch('http://127.0.0.1:8000/lutas?limit=10')
+      .then(response => response.json())
       .then(data => {
-        setCompeticoes(data.dados)
+        setLutas(data.dados)
         setLoading(false)
       })
       .catch(error => {
@@ -24,7 +29,6 @@ function App() {
       <h1>Info Oss Total 🥋</h1>
       <p>Dashboard de Dados de Judô</p>
 
-      {/* Navegação das Abas */}
       <div className="tabs">
         <button 
           className={`tab-btn ${activeTab === 'competicoes' ? 'active' : ''}`}
@@ -40,41 +44,78 @@ function App() {
         </button>
       </div>
       
-      {/* Conteúdo baseado na aba ativa */}
       {activeTab === 'competicoes' && (
         <>
           {loading ? (
-            <p>Carregando dados da API...</p>
+            <p>Carregando dados...</p>
           ) : (
-            <table>
-              <thead>
-                <tr>
-                  <th>ID</th>
-                  <th>Nome do Campeonato</th>
-                  <th>Cidade</th>
-                  <th>País</th>
-                </tr>
-              </thead>
-              <tbody>
-                {competicoes.map(comp => (
-                  <tr key={comp.id_competition}>
-                    <td>{comp.id_competition}</td>
-                    <td>{comp.name}</td>
-                    <td>{comp.city}</td>
-                    <td>{comp.country}</td>
+            <div className="table-wrapper">
+              <table>
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Nome do Campeonato</th>
+                    <th>Cidade</th>
+                    <th>País</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {competicoes.map(comp => (
+                    <tr key={comp.id_competition}>
+                      <td>{comp.id_competition}</td>
+                      <td>{comp.name}</td>
+                      <td>{comp.city}</td>
+                      <td>{comp.country}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           )}
         </>
       )}
 
       {activeTab === 'lutas' && (
-        <div style={{ padding: '20px', textAlign: 'center', color: '#666' }}>
-          <h3>Tabela de Lutas em construção... 🚧</h3>
-          <p>Na próxima etapa, vamos puxar os dados da API aqui!</p>
-        </div>
+        <>
+          {loading ? (
+            <p>Carregando dados...</p>
+          ) : (
+            <div className="table-wrapper">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Campeonato</th>
+                    <th>Data</th>
+                    <th>Categoria</th>
+                    <th>Atleta Branco</th>
+                    <th>Atleta Azul</th>
+                    <th>Vencedor</th>
+                    <th>Duração</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {lutas.map(luta => {
+                    const nomeVencedor = luta.id_winner === luta.id_person_white 
+                      ? luta.person_white 
+                      : luta.person_blue;
+
+                    return (
+                      <tr key={luta.id_fight}>
+                        <td>{luta.competition_name}</td>
+                        <td>{luta.competition_date}</td>
+                        <td>{luta.weight}</td>
+                        <td>{luta.person_white}</td>
+                        <td>{luta.person_blue}</td>
+                        <td style={{ fontWeight: 'bold', color: '#007bff' }}>{nomeVencedor}</td>
+                        <td>{luta.duration}</td>
+                      </tr>
+                    )
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </>
       )}
     </div>
   )
