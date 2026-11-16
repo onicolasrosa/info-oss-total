@@ -13,6 +13,8 @@ app = FastAPI(
 # Define o caminho onde estão os dados salvos pelo nosso script de ETL
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 DATA_PATH = BASE_DIR / "data" / "raw" / "competitions_sample.parquet"
+LUTAS_DATA_PATH = BASE_DIR / "data" / "raw" / "contests_sample.parquet"
+
 
 @app.get("/")
 def read_root():
@@ -40,4 +42,30 @@ def get_competicoes():
         }
     except Exception as e:
         # Se der erro, a API vai nos dizer qual foi o erro!
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/lutas")
+def get_lutas(weight: str = None):
+    """
+    Retorna a lista de lutas. 
+    Permite filtrar opcionalmente pela categoria de peso (ex: /lutas?weight=-73).
+    """
+    if not LUTAS_DATA_PATH.exists():
+        raise HTTPException(status_code=404, detail="Arquivo de lutas não encontrado. Rode o script de ETL.")
+    
+    try:
+        df = pd.read_parquet(LUTAS_DATA_PATH)
+        
+        # Se o usuário passar o parâmetro weight na URL, nós filtramos a tabela
+        if weight:
+            df = df[df['weight'] == weight]
+            
+        lutas = json.loads(df.to_json(orient="records"))
+        
+        return {
+            "total": len(lutas),
+            "filtro_aplicado": weight if weight else "Nenhum",
+            "dados": lutas
+        }
+    except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
