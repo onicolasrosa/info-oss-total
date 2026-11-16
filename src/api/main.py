@@ -1,8 +1,7 @@
 from fastapi import FastAPI, HTTPException
 import pandas as pd
 from pathlib import Path
-import json 
-
+import json
 
 app = FastAPI(
     title="Info Oss Total API",
@@ -10,34 +9,33 @@ app = FastAPI(
     version="0.1.0"
 )
 
-# Define o caminho onde estão os dados salvos pelo nosso script de ETL
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
-DATA_PATH = BASE_DIR / "data" / "raw" / "competitions_sample.parquet"
+COMPETICOES_DATA_PATH = BASE_DIR / "data" / "raw" / "competitions_sample.parquet"
 LUTAS_DATA_PATH = BASE_DIR / "data" / "raw" / "contests_sample.parquet"
-
 
 @app.get("/")
 def read_root():
     return {"status": "ok", "message": "Bem-vindo à API do Info Oss Total! 🥋"}
 
 @app.get("/competicoes")
-def get_competicoes():
-    """Retorna a lista de competições disponíveis na base."""
-    # Verifica se o arquivo existe
-    if not DATA_PATH.exists():
-        raise HTTPException(status_code=404, detail="Arquivo de competições não encontrado. Rode o script de ETL.")
-
+def get_competicoes(skip: int = 0, limit: int = 10):
+    """Retorna a lista de competições com paginação."""
+    if not COMPETICOES_DATA_PATH.exists():
+        raise HTTPException(status_code=404, detail="Arquivo de competições não encontrado.")
+    
     try:
-        # Lê o arquivo Parquet usando o Pandas
-        df = pd.read_parquet(DATA_PATH)
+        df = pd.read_parquet(COMPETICOES_DATA_PATH)
+        total_registros = len(df)
         
-        # Converte a tabela para uma lista de dicionários (JSON)
-        # FastAPI transforma isso automaticamente em um JSON.
-        competicoes = json.loads(df.to_json(orient="records"))
+        # (Slicing do Pandas)
+        df_paginado = df.iloc[skip : skip + limit]
         
-        # Retorna o total e os dados
+        competicoes = json.loads(df_paginado.to_json(orient="records"))
+        
         return {
-            "total": len(competicoes),
+            "total_de_registros": total_registros,
+            "skip": skip,
+            "limit": limit,
             "dados": competicoes
         }
     except Exception as e:
@@ -45,26 +43,30 @@ def get_competicoes():
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/lutas")
-def get_lutas(weight: str = None):
-    """
-    Retorna a lista de lutas. 
-    Permite filtrar opcionalmente pela categoria de peso (ex: /lutas?weight=-73).
-    """
+def get_lutas(weight: str = None, skip: int = 0, limit: int = 10):
+    """Retorna a lista de lutas com filtro e paginação."""
     if not LUTAS_DATA_PATH.exists():
-        raise HTTPException(status_code=404, detail="Arquivo de lutas não encontrado. Rode o script de ETL.")
+        raise HTTPException(status_code=404, detail="Arquivo de lutas não encontrado.")
     
     try:
         df = pd.read_parquet(LUTAS_DATA_PATH)
         
-        # Se o usuário passar o parâmetro weight na URL, nós filtramos a tabela
+        # Aplica o filtro de peso, se existir
         if weight:
             df = df[df['weight'] == weight]
             
-        lutas = json.loads(df.to_json(orient="records"))
+        total_registros = len(df)
+        
+        # Aplica a paginação
+        df_paginado = df.iloc[skip : skip + limit]
+        
+        lutas = json.loads(df_paginado.to_json(orient="records"))
         
         return {
-            "total": len(lutas),
+            "total_de_registros": total_registros,
             "filtro_aplicado": weight if weight else "Nenhum",
+            "skip": skip,
+            "limit": limit,
             "dados": lutas
         }
     except Exception as e:
