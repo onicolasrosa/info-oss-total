@@ -2,11 +2,20 @@ from fastapi import FastAPI, HTTPException
 import pandas as pd
 from pathlib import Path
 import json
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI(
     title="Info Oss Total API",
     description="API com dados de Judô e Jiu-Jitsu.",
     version="0.1.0"
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent

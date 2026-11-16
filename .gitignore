@@ -232,3 +232,6 @@ data/processed/*
 # Exceções para manter as pastas vazias no GitHub (O Git não salva pastas vazias)
 !data/raw/.gitkeep
 !data/processed/.gitkeep
+
+node_modules/
+dist/
