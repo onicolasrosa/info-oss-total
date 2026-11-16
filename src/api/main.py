@@ -80,3 +80,25 @@ def get_lutas(weight: str = None, skip: int = 0, limit: int = 10):
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/categorias")
+def get_categorias():
+    """Retorna a lista de todas as categorias de peso únicas disponíveis na base."""
+    if not LUTAS_DATA_PATH.exists():
+        raise HTTPException(status_code=404, detail="Arquivo de lutas não encontrado.")
+    
+    try:
+        df = pd.read_parquet(LUTAS_DATA_PATH)
+        
+        # Pega os valores únicos, remove nulos e ordena
+        categorias = df['weight'].dropna().unique().tolist()
+        
+        def ordenar_peso(w):
+            numero = abs(float(str(w).replace('+', '')))
+            return numero + (0.1 if str(w).startswith('+') else 0)
+            
+        categorias_ordenadas = sorted(categorias, key=ordenar_peso)
+        
+        return {"categorias": categorias_ordenadas}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
